@@ -1,8 +1,8 @@
-import LoginScreen from "./src/components/LoginScreen/LoginScreen";
+import RegistrationScreen from "./src/screens/RegistrationScreen/RegistrationScreen";
 
 export default function App() {
   return (
-    <LoginScreen />
+    <RegistrationScreen />
   )
 }
 

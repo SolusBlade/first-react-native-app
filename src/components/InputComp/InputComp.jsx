@@ -2,7 +2,7 @@ import { TextInput} from 'react-native';
 import styles from '../../assets/styles/styles';
 import { useState } from 'react';
 
-const InputComp = ({placeholderText, type}) => {
+const InputComp = ({placeholderText, type, value, setFormData, fieldName}) => {
     const [isFocused, setIsFocused] = useState(false);
 
     const handleFocus = () => {
@@ -12,6 +12,13 @@ const InputComp = ({placeholderText, type}) => {
     const handleBlur = () => {
         setIsFocused(false);
     };
+
+    const handleInputChange = (value) => {
+        setFormData((prevData) => ({
+        ...prevData,
+        [fieldName]: value,
+        }));
+    };
     
     return (
         <TextInput style={[
@@ -19,6 +26,8 @@ const InputComp = ({placeholderText, type}) => {
           isFocused ? styles.inputFocused : null,
         ]}
         secureTextEntry={type === "password" && true}
+        value={value}
+        onChangeText={(value) => handleInputChange(value)}
         onFocus={handleFocus}
         onBlur={handleBlur} placeholderTextColor="#BDBDBD" placeholder={placeholderText}/>
     )
