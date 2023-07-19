@@ -8,6 +8,7 @@ import {
 	Pressable,
 	StyleSheet,
 	Text,
+	TouchableOpacity,
 	TouchableWithoutFeedback,
 	View,
 } from "react-native";
@@ -15,6 +16,9 @@ import { useNavigation } from "@react-navigation/native";
 import { Entypo } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useToast } from "react-native-toast-notifications";
+import { Camera } from "expo-camera";
+import * as MediaLibrary from "expo-media-library";
+import * as Location from "expo-location";
 
 import colors from "../config/colors";
 
@@ -22,11 +26,13 @@ import AppButton from "../components/AppButton";
 import AppTextInput from "../components/AppTextInput";
 import DeleteBtn from "../components/DeleteBtn";
 import Container from "../components/Container";
+import PressableWrap from "../components/PressableWrap";
 
 const initialState = {
 	image: null,
 	title: "",
 	place: "",
+	coords: {},
 };
 
 export default function CreatePostsScreen() {
@@ -37,7 +43,53 @@ export default function CreatePostsScreen() {
 	const [state, setState] = useState(initialState);
 	const [isFocused, setIsFocused] = useState(null);
 
-	// console.log("fcous", isFocused);
+	const [hasPermission, setHasPermission] = useState(null);
+	const [cameraRef, setCameraRef] = useState(null);
+	const [type, setType] = useState(Camera.Constants.Type.back);
+
+	useEffect(() => {
+		(async () => {
+			const { status } = await Camera.requestCameraPermissionsAsync();
+			await MediaLibrary.requestPermissionsAsync();
+			await Location.requestForegroundPermissionsAsync();
+
+			setHasPermission(status === "granted");
+
+			let location = await Location.getCurrentPositionAsync({});
+
+			const coords = {
+				latitude: location.coords.latitude,
+				longitude: location.coords.longitude,
+			};
+
+			setState((prevState) => ({ ...prevState, coords }));
+		})();
+	}, []);
+
+	if (hasPermission === null) {
+		return <View />;
+	}
+	if (hasPermission === false) {
+		return <Text>No access to camera</Text>;
+	}
+
+	const takePhoto = async () => {
+		if (cameraRef) {
+			const { uri } = await cameraRef.takePictureAsync();
+			await MediaLibrary.createAssetAsync(uri);
+
+			setState((prevState) => ({ ...prevState, image: uri }));
+			console.log("image", state.image);
+		}
+	};
+
+	const changeCamera = () => {
+		setType(
+			type === Camera.Constants.Type.back
+				? Camera.Constants.Type.front
+				: Camera.Constants.Type.back
+		);
+	};
 
 	const deleteImage = () => {
 		setState((prevState) => ({ ...prevState, image: null }));
@@ -68,11 +120,11 @@ export default function CreatePostsScreen() {
 		}
 
 		navigation.navigate("Home", {
-			screen: "Profile",
+			screen: "Posts",
 			params: { state },
 		});
 
-		console.log("state", state);
+		// console.log("state", state);
 		setIsFocused(null);
 		setState(initialState);
 	};
@@ -86,42 +138,46 @@ export default function CreatePostsScreen() {
 			keyboardOffset={-190}
 			style={{ justifyContent: "space-between" }}
 		>
-			<Pressable style={styles.imgInputContainer} onPress={() => pickImage()}>
-				<View style={styles.imgContainer}>
-					{state.image && (
-						<ImageBackground
-							style={styles.image}
-							source={{ uri: state.image }}
+			<View style={styles.imgInputContainer}>
+				<Camera style={styles.camera} type={type} ref={setCameraRef}>
+					<View style={styles.imgContainer}>
+						{state.image && (
+							<ImageBackground
+								style={styles.image}
+								source={{ uri: state.image }}
+							/>
+						)}
+					</View>
+					<TouchableOpacity
+						onPress={takePhoto}
+						style={[
+							styles.cameraIconWrap,
+							{
+								backgroundColor: state.image ? colors.offWhite : colors.white,
+							},
+						]}
+					>
+						<Entypo
+							name="camera"
+							size={24}
+							style={styles.cameraIcon}
+							color={state.image ? colors.white : colors.gray}
 						/>
-					)}
-				</View>
-				<View
-					style={[
-						styles.cameraIconWrap,
-						{ backgroundColor: state.image ? colors.offWhite : colors.white },
-					]}
-				>
-					<Entypo
-						name="camera"
-						size={24}
-						style={styles.cameraIcon}
-						color={state.image ? colors.white : colors.gray}
-					/>
-				</View>
+					</TouchableOpacity>
+				</Camera>
 
 				<Text style={styles.loadText}>
 					{state.image ? "Редагувати фото" : "Завантажте фото"}
 				</Text>
 				{state.image && (
-					<Entypo
-						style={styles.deleteIcon}
-						onPress={() => deleteImage()}
-						name="circle-with-cross"
-						size={24}
-						color={colors.gray}
+					<PressableWrap
+						iconName="camera-reverse-outline"
+						iconPressedName="camera-reverse-sharp"
+						onPress={changeCamera}
+						style={styles.changeCameraIcon}
 					/>
 				)}
-			</Pressable>
+			</View>
 
 			<AppTextInput
 				icon="pencil"
@@ -160,9 +216,27 @@ const styles = StyleSheet.create({
 	imgInputContainer: {
 		gap: 8,
 	},
-	imgContainer: {
+	camera: {
+		aspectRatio: 343 / 240,
+		borderRadius: 8,
+		overflow: "hidden",
 		width: "100%",
-		height: 240,
+		borderWidth: 1,
+		borderColor: colors.gray,
+
+		// backgroundColor: colors.bgInput,
+	},
+
+	imgContainer: {
+		position: "absolute",
+		bottom: 0,
+		right: 0,
+		backgroundColor: "red",
+		borderWidth: 1,
+		borderColor: colors.gray,
+
+		width: 100,
+		height: 70,
 		borderRadius: 8,
 		overflow: "hidden",
 		backgroundColor: colors.bgInput,
@@ -185,7 +259,7 @@ const styles = StyleSheet.create({
 		top: 18,
 		left: 18,
 	},
-	deleteIcon: {
+	changeCameraIcon: {
 		position: "absolute",
 		bottom: 6,
 		right: 6,

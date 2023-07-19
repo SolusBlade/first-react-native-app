@@ -59,7 +59,7 @@ export default function RegisterScreen() {
 
 		navigation.navigate("Home", {
 			screen: "Profile",
-			params: { email: data.email, login: data.login, uri: image },
+			params: { email: data.email, login: data.login, avatar: image },
 		});
 	};
 

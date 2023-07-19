@@ -12,7 +12,7 @@ import Avatar from "../components/Avatar";
 import LogOutBtn from "../components/LogOutBtn";
 
 export default function ProfileScreen() {
-
+	
 	return (
 		<View style={styles.container}>
 			<ScreenImage />
@@ -28,7 +28,7 @@ export default function ProfileScreen() {
 				<Title>Solus Blade</Title>
 
 				<ImageCard />
-				<ImageCard />
+				{/* <ImageCard /> */}
 			</View>
 		</View>
 	);
@@ -37,7 +37,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		// justifyContent: "flex-end",
+		justifyContent: "flex-end",
 	},
 	formContainer: {
 		gap: 32,

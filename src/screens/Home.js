@@ -14,17 +14,18 @@ import LogOutBtn from "../components/LogOutBtn";
 
 import colors from "../config/colors";
 import CommentsScreen from "./CommentsScreen";
+import MapScreen from "./MapScreen";
 
 const Tabs = createBottomTabNavigator();
 
 <AntDesign name="delete" size={24} color="black" />;
+
 
 export default function Home() {
 
 	return (
 		<Tabs.Navigator
 			initialRouteName="Profile"
-			
 			screenOptions={({ route }) => ({
 				tabBarStyle: {
 					height: 60,
@@ -84,9 +85,6 @@ export default function Home() {
 						fontSize: 18,
 						color: colors.black,
 					},
-					// headerTitleContainerStyle: {
-					// 	marginLeft: 140,
-					// },
 					headerRight: () => <LogOutBtn style={{ top: 15 }} />,
 				}}
 			/>
@@ -109,9 +107,6 @@ export default function Home() {
 						fontSize: 18,
 						color: colors.black,
 					},
-					// headerTitleContainerStyle: {
-					// 	marginHorizontal: 40,
-					// },
 					headerLeft: () => {
 						return (
 							// back &&
@@ -151,7 +146,36 @@ export default function Home() {
 					},
 				})}
 			/>
+			<Tabs.Screen
+				name="Map"
+				component={MapScreen}
+				options={({ navigation, back }) => ({
+					tabBarItemStyle: { display: "none" },
+					tabBarStyle: { display: "none" },
+					title: "Мапа",
 
+					headerStyle: {
+						borderBottomWidth: 1,
+						borderBottomColor: colors.gray,
+					},
+					headerTintColor: colors.gray,
+					headerTitleAlign: "center",
+					headerTitleStyle: {
+						fontWeight: "medium",
+						fontSize: 18,
+						color: colors.black,
+					},
+					headerTitleContainerStyle: {
+						marginHorizontal: 40,
+					},
+					headerLeft: () => {
+						return (
+							// back &&
+							<GoBackBtn />
+						);
+					},
+				})}
+			/>
 			<Tabs.Screen
 				name="Profile"
 				component={ProfileScreen}
@@ -160,9 +184,5 @@ export default function Home() {
 				}}
 			/>
 		</Tabs.Navigator>
-		// <View style={styles.container}>
-		// 	<UserInfo login={login} email={email} />
-		// 	<BottomTabBar />
-		// </View>
 	);
 }

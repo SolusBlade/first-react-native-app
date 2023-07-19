@@ -2,13 +2,17 @@ import React from "react";
 import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
 import colors from "../config/colors";
 
-export default function UserInfo({ login, email, uri }) {
+export default function UserInfo({
+	login = "Solus Blade",
+	email,
+	uri = "file:///data/user/0/host.exp.exponent/cache/ExperienceData/%2540anonymous%252FMyApp-4131bc3f-d962-4fcb-b707-650a1d72e688/ImagePicker/b0660409-0694-4fc6-86dc-6c39f42cd969.jpeg",
+}) {
 	return (
 		<>
 			<View style={styles.container}>
 				<View style={styles.avatar}>
 					<ImageBackground
-						source={{ uri }}
+						source={{ uri: uri }}
 						resizeMode="cover"
 						style={styles.image}
 					/>

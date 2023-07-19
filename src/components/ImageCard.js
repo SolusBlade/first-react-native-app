@@ -1,27 +1,40 @@
 import React from "react";
-import { ImageBackground, TouchableWithoutFeedback } from "react-native";
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import colors from "../config/colors";
-import { FontAwesome5, SimpleLineIcons } from "@expo/vector-icons";
 import AppImageBackground from "./AppImageBackground";
+import PressableWrap from "./PressableWrap";
 
-export default function ImageCard({ onPress }) {
+export default function ImageCard({
+	coords = { latitude: 50, longitude: 50 },
+	image = "file:///data/user/0/host.exp.exponent/cache/ExperienceData/%2540anonymous%252FMyApp-4131bc3f-d962-4fcb-b707-650a1d72e688/ImagePicker/b0660409-0694-4fc6-86dc-6c39f42cd969.jpeg",
+	onCommentPress,
+	onLocationPress,
+	place = "Ivano-Frankivs'k Region, Ukraine",
+	title = "Wonderful picture",
+}) {
 	return (
 		<View style={styles.container}>
-			<AppImageBackground source={require("../assets/images/bg4.jpg")} />
+			<AppImageBackground source={{ uri: image }} />
 
-			<Text style={styles.title}>ImageCard</Text>
+			<Text style={styles.title}>{title}</Text>
 			<View style={styles.infoContainer}>
-				<TouchableWithoutFeedback onPress={onPress}>
-					<View style={styles.infoWrap} onPress={onPress}>
-						<FontAwesome5 name="comment" size={24} color={colors.gray} />
-						<Text style={styles.infoText}>55</Text>
-					</View>
-				</TouchableWithoutFeedback>
 				<View style={styles.infoWrap}>
-					<SimpleLineIcons name="location-pin" size={24} color={colors.gray} />
+					<PressableWrap
+						iconName="chatbubbles-outline"
+						iconPressedName="chatbubbles-sharp"
+						onPress={onCommentPress}
+					/>
+					<Text style={styles.infoText}>55</Text>
+				</View>
+
+				<View style={styles.infoWrap}>
+					<PressableWrap
+						iconName="location-outline"
+						iconPressedName="location-sharp"
+						onPress={onLocationPress}
+					/>
 					<Text style={[styles.infoText, { textDecorationLine: "underline" }]}>
-						Ivano-Frankivs'k Region, Ukraine
+						{place}
 					</Text>
 				</View>
 			</View>
