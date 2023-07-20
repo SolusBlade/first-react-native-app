@@ -1,6 +1,4 @@
 import "react-native-gesture-handler";
-import { createStackNavigator } from "@react-navigation/stack";
-import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import {
 	Button,
 	Keyboard,
@@ -10,18 +8,26 @@ import {
 	TouchableWithoutFeedback,
 	View,
 } from "react-native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
 import { SimpleLineIcons } from "@expo/vector-icons";
 import { ToastProvider } from "react-native-toast-notifications";
+
 import Home from "./src/screens/Home";
 import LoginScreen from "./src/screens/LoginScreen";
 import RegisterScreen from "./src/screens/RegisterScreen";
-import colors from "./src/config/colors";
 import LogOutBtn from "./src/components/LogOutBtn";
 
-const MainStack = createStackNavigator();
+import colors from "./src/config/colors";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { store, persistor } from "./src/redux/store";
+import getStorage from "redux-persist/es/storage/getStorage";
 
+const MainStack = createStackNavigator();
+// console.log("state", store.getState());
 export default function src() {
 	const [fontsLoaded] = useFonts({
 		"Roboto-Bold": require("./src/assets/fonts/Roboto-Bold.ttf"),
@@ -34,73 +40,77 @@ export default function src() {
 	}
 
 	return (
-		<ToastProvider
-			placement="top"
-			duration={2500}
-			animationType="slide-in"
-			animationDuration={550}
-			warningColor={colors.accentDark}
-			icon={
-				<SimpleLineIcons
-					name="speech"
-					size={24}
-					color={colors.white}
-					style={{ paddingVertycal: 12, paddingHorizontal: 12 }}
-				/>
-			}
-			textStyle={{ fontSize: 20 }}
-			offset={200}
-			swipeEnabled={true}
-		>
-			<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-				<SafeAreaView style={{ flex: 1 }}>
-					<View style={styles.container}>
-						<StatusBar style="auto" />
-						<NavigationContainer>
-							<MainStack.Navigator
-								initialRouteName="Login"
-								// initialRouteName="Home"
-							>
-								<MainStack.Screen
-									name="Login"
-									component={LoginScreen}
-									options={{ headerShown: false }}
-								/>
-								<MainStack.Screen
-									name="Register"
-									component={RegisterScreen}
-									options={{ headerShown: false }}
-								/>
-								<MainStack.Screen
-									name="Home"
-									component={Home}
-									options={{
-										headerShown: false,
-										title: "Створити публікацію",
-										headerStyle: {
-											borderBottomWidth: 1,
-											borderBottomColor: colors.gray,
-										},
-										headerTintColor: colors.gray,
-										headerTitleStyle: {
-											fontWeight: "medium",
-											fontSize: 18,
-											color: colors.black,
-										},
-										headerTitleContainerStyle: {
-											marginHorizontal: 80,
-										},
-										headerRight: () => <LogOutBtn />,
-									}}
-								/>
-							</MainStack.Navigator>
-							{/* <WelcomeScreen /> */}
-							{/* <PostsScreen /> */}
-						</NavigationContainer>
-					</View>
-				</SafeAreaView>
-			</TouchableWithoutFeedback>
-		</ToastProvider>
+		<Provider store={store}>
+			<PersistGate loading={null} persistor={persistor}>
+				<ToastProvider
+					placement="top"
+					duration={3000}
+					animationType="slide-in"
+					animationDuration={550}
+					warningColor={colors.accentDark}
+					icon={
+						<SimpleLineIcons
+							name="speech"
+							size={22}
+							color={colors.white}
+							// style={{ paddingVertycal: 12, paddingHorizontal: 12 }}
+						/>
+					}
+					textStyle={{ fontSize: 20 }}
+					offset={200}
+					swipeEnabled={true}
+				>
+					<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+						<SafeAreaView style={{ flex: 1 }}>
+							<View style={styles.container}>
+								<StatusBar style="auto" />
+								<NavigationContainer>
+									<MainStack.Navigator
+										initialRouteName="Login"
+										// initialRouteName="Home"
+									>
+										<MainStack.Screen
+											name="Login"
+											component={LoginScreen}
+											options={{ headerShown: false }}
+										/>
+										<MainStack.Screen
+											name="Register"
+											component={RegisterScreen}
+											options={{ headerShown: false }}
+										/>
+										<MainStack.Screen
+											name="Home"
+											component={Home}
+											options={{
+												headerShown: false,
+												title: "Створити публікацію",
+												headerStyle: {
+													borderBottomWidth: 1,
+													borderBottomColor: colors.gray,
+												},
+												headerTintColor: colors.gray,
+												headerTitleStyle: {
+													fontWeight: "medium",
+													fontSize: 18,
+													color: colors.black,
+												},
+												headerTitleContainerStyle: {
+													marginHorizontal: 80,
+												},
+												headerRight: () => <LogOutBtn />,
+											}}
+										/>
+									</MainStack.Navigator>
+									{/* <WelcomeScreen /> */}
+									{/* <PostsScreen /> */}
+								</NavigationContainer>
+							</View>
+						</SafeAreaView>
+					</TouchableWithoutFeedback>
+				</ToastProvider>
+			</PersistGate>
+		</Provider>
 	);
 }
 

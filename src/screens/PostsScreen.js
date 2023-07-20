@@ -3,12 +3,15 @@ import { useRoute, route } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 
 import UserInfo from "../components/UserInfo";
-import ImageCard from "../components/ImageCard";
+import ImageCard from "../components/ListImageCard";
 import Container from "../components/Container";
 
 import colors from "../config/colors";
 import { useEffect, useState } from "react";
 import PostsSeparator from "../components/PostsSeparator";
+import ListImageCard from "../components/ListImageCard";
+import { View } from "react-native";
+import ListItemDeleteAction from "../components/ListItemDeleteAction";
 
 const userInit = {
 	email: "solus@gmail.com",
@@ -25,11 +28,19 @@ const postsInit = [
 		place: "Ivano-Frankivs'k Region, Ukraine",
 		coords: { latitude: 48.64673964273703, longitude: 24.349936255514663 },
 	},
+	{
+		image:
+			"file:///data/user/0/host.exp.exponent/cache/ExperienceData/%2540anonymous%252FMyApp-4131bc3f-d962-4fcb-b707-650a1d72e688/ImagePicker/b0660409-0694-4fc6-86dc-6c39f42cd969.jpeg",
+		title: "Nice photo",
+		place: "Carpathians, Ukraine",
+		coords: { latitude: 49.64673964273703, longitude: 23.349936255514663 },
+	},
 ];
 
 export default function PostsScreen({ navigation, route }) {
 	const [posts, setPosts] = useState(postsInit);
 	const [user, setUser] = useState(userInit);
+	const [refreshing, setRefreshing] = useState(false);
 
 	useEffect(() => {
 		if (route.params.state?.image) {
@@ -46,6 +57,12 @@ export default function PostsScreen({ navigation, route }) {
 			});
 		}
 	}, [route.params.email]);
+
+	const handleDelete = (post) => {
+		console.log("delete", post);
+		const newPosts = posts.filter((p) => p.title !== post.title);
+		setPosts(newPosts);
+	};
 
 	const handleCommentPress = () => {
 		navigation.navigate("Home", {
@@ -64,7 +81,7 @@ export default function PostsScreen({ navigation, route }) {
 			},
 		});
 	};
-	console.log("posts", posts);
+	// console.log("posts", posts);
 
 	return (
 		<Container style={{ gap: 32 }}>
@@ -72,14 +89,26 @@ export default function PostsScreen({ navigation, route }) {
 
 			<FlatList
 				data={posts}
-				keyExtractor={(_, id) => {
-					console.log("id", id.toString());
-					return id.toString();
-				}}
+				keyExtractor={(_, id) => id.toString()}
 				ItemSeparatorComponent={() => <PostsSeparator />}
+				refreshing={refreshing}
+				onRefresh={() => {
+					setPosts([
+						{
+							image:
+								"file:///data/user/0/host.exp.exponent/cache/ExperienceData/%2540anonymous%252FMyApp-4131bc3f-d962-4fcb-b707-650a1d72e688/ImagePicker/b0660409-0694-4fc6-86dc-6c39f42cd969.jpeg",
+							title: "Nice photo",
+							place: "Carpathians, Ukraine",
+							coords: {
+								latitude: 49.64673964273703,
+								longitude: 23.349936255514663,
+							},
+						},
+					]);
+				}}
 				renderItem={({ item }) => {
 					return (
-						<ImageCard
+						<ListImageCard
 							image={item.image}
 							title={item.title}
 							place={item.place}
@@ -87,6 +116,10 @@ export default function PostsScreen({ navigation, route }) {
 							onLocationPress={() =>
 								handleLocationPress(item.coords, item.place)
 							}
+							onPress={() => console.log("ListItemPressed", item)}
+							renderRightActions={() => (
+								<ListItemDeleteAction onPress={() => handleDelete(item)} />
+							)}
 						/>
 					);
 				}}

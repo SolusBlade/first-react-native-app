@@ -9,21 +9,32 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useForm, Controller } from "react-hook-form";
+import { useToast } from "react-native-toast-notifications";
 
 import { emailRules, passwordRules } from "../utils/validateInputs";
 import padding from "../utils/paddingsStyling";
 import colors from "../config/colors";
 
-import ButtonEl from "../components/AppButton";
+import AppButton from "../components/AppButton";
 import Title from "../components/Title";
 import LinkText from "../components/LinkText";
 import ScreenImage from "../components/ScreenImage";
 import EyeToggle from "../components/EyeToggle";
+import { FIREBASE_AUTH } from "../../FirebaseConfig";
+import { ActivityIndicator } from "react-native";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { findUserDB, loginUserDB } from "../utils/firebaseDBHandlers";
+import { useDispatch } from "react-redux";
+import { addUser } from "../redux/slice";
 
-export default function LoginScreen() {
+export default function LoginScreen({ navigation }) {
 	const [isSecure, setIsSecure] = useState(true);
 	const [isFocused, setIsFocused] = useState(null);
-	const navigation = useNavigation();
+	const [loading, setLoading] = useState(false);
+
+	const dispatch = useDispatch();
+	const toast = useToast();
+	const auth = FIREBASE_AUTH;
 
 	const defaultValues = {
 		email: "",
@@ -49,15 +60,34 @@ export default function LoginScreen() {
 		setIsFocused(null);
 	};
 
-	const onSubmit = (data) => {
-		console.log("Registration data", data);
-		reset(defaultValues);
-		setIsFocused(null);
-		navigation.navigate("Home", {
-			screen: "Posts",
+	const login = async ({ email, password }) => {
+		console.log("Login data", email, password);
+		setLoading(true);
+		try {
+			const response = await signInWithEmailAndPassword(auth, email, password);
+			// find user in DB
+			console.log("response fire login", response.user);
+			const user = await findUserDB(email);
+			console.log("DBfire login", user);
 
-			params: { email: data.email },
-		});
+			dispatch(addUser(user));
+
+			navigation.navigate("Home", {
+				screen: "Posts",
+
+				params: { email },
+			});
+		} catch (error) {
+			console.log(error);
+			toast.show("LogIn failed" + error.message, {
+				type: "warning",
+			});
+		} finally {
+			reset(defaultValues);
+			setIsFocused(null);
+
+			setLoading(false);
+		}
 	};
 
 	return (
@@ -126,7 +156,11 @@ export default function LoginScreen() {
 					)}
 				</View>
 
-				<ButtonEl text="Увійти" onPress={handleSubmit(onSubmit)} />
+				{loading ? (
+					<ActivityIndicator size="large" color={colors.accent} />
+				) : (
+					<AppButton text="Увійти" onPress={handleSubmit(login)} />
+				)}
 
 				<LinkText navigateTo={"register"} navigation={navigation} />
 			</View>
